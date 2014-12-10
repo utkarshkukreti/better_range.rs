@@ -3,3 +3,9 @@ pub struct Range<T> {
     to: T,
     step: T
 }
+
+pub trait Step {
+    fn zero() -> Self;
+    fn one() -> Self;
+    fn add(Self, Self) -> Option<Self>;
+}
