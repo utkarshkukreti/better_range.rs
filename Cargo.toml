@@ -1,0 +1,5 @@
+[package]
+
+name = "better_range"
+version = "0.0.1"
+authors = ["Utkarsh Kukreti <utkarshkukreti@gmail.com>"]
