@@ -22,3 +22,12 @@ impl Step for int {
     }
     fn infinity() -> int { Int::max_value() }
 }
+
+pub fn from<T: Step>(from: T) -> Range<T> {
+    Range {
+        from: from,
+        to: Step::infinity(),
+        step: Step::one(),
+        done: false
+    }
+}
