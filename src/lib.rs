@@ -1,5 +1,5 @@
 #![feature(macro_rules, phase)]
-use std::num::Int;
+use std::num::{Float, Int};
 
 pub struct Range<T> {
     from: T,
@@ -33,6 +33,23 @@ macro_rules! impl_step_int {
 }
 
 impl_step_int!(u8, u16, u32, u64, uint, i8, i16, i32, i64, int)
+
+macro_rules! impl_step_float {
+    ($($ty:ty),+) => {
+        $(
+            impl Step for $ty {
+                fn zero() -> $ty { 0.0 }
+                fn one() -> $ty { 1.0 }
+                fn next(from: $ty, step: $ty) -> Option<$ty> {
+                    Some(from + step)
+                }
+                fn infinity() -> $ty { Float::max_value() }
+            }
+        )+
+    }
+}
+
+impl_step_float!(f32, f64)
 
 impl<T: Step> Iterator<T> for Range<T> {
     #[inline]
@@ -137,22 +154,27 @@ mod test {
             eq!(from(1i).take(5), [1, 2, 3, 4, 5]);
             eq!(to(4i), [0, 1, 2, 3, 4])
             eq!(step(4i).take(5), [0, 4, 8, 12, 16]);
+            eq!(to(4.0f32), [0., 1., 2., 3., 4.])
+            eq!(step(0.4f32).take(3), [0.0, 0.4, 0.8])
         }
 
         it "handles chaining" {
             eq!(from(0i).to(10).step(2), [0, 2, 4, 6, 8, 10])
             eq!(from(0i).step(20).take(4), [0, 20, 40, 60])
+            eq!(from(1.1f32).to(2.2).step(0.4), [1.1, 1.5, 1.9])
         }
 
         it "works with negative steps" {
             eq!(from(10i).to(0).step(-3), [10, 7, 4, 1]);
             eq!(from(0i).to(10).step(-3), []);
             eq!(from(-10i).to(-20).step(-5), [-10, -15, -20]);
+            eq!(from(-10.0f32).to(-20.).step(-5.), [-10., -15., -20.]);
         }
 
         it "handles exclusive ranges" {
             eq!(from(10i).until(20).step(5), [10, 15])
             eq!(from(10i).until(-10).step(-5), [10, 5, 0, -5]);
+            eq!(from(10.0f32).until(-10.0).step(-5.), [10.0, 5.0, 0.0, -5.0]);
         }
 
         describe! benches {
