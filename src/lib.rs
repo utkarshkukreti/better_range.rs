@@ -5,7 +5,8 @@ pub struct Range<T> {
     from: T,
     to: T,
     step: T,
-    done: bool
+    done: bool,
+    reverse: bool
 }
 
 pub trait Step: Copy + PartialOrd {
@@ -28,7 +29,8 @@ impl<T: Step> Iterator<T> for Range<T> {
     fn next(&mut self) -> Option<T> {
         if self.done {
             None
-        } else if self.from > self.to {
+        } else if self.reverse && self.to > self.from ||
+                 !self.reverse && self.to < self.from {
             None
         } else {
             let ret = self.from;
@@ -59,7 +61,8 @@ impl<T: Step> Range<T> {
             from: Step::zero(),
             to: Step::infinity(),
             step: Step::one(),
-            done: false
+            done: false,
+            reverse: false
         }
     }
 
@@ -78,8 +81,10 @@ impl<T: Step> Range<T> {
     }
 
     pub fn step(self, step: T) -> Range<T> {
+        let reverse = step < Step::zero();
         Range {
             step: step,
+            reverse: reverse,
             ..self
         }
     }
@@ -109,6 +114,12 @@ mod test {
         it "handles chaining" {
             eq!(from(0).to(10).step(2), [0, 2, 4, 6, 8, 10])
             eq!(from(0).step(20).take(4), [0, 20, 40, 60])
+        }
+
+        it "works with negative steps" {
+            eq!(from(10).to(0).step(-3), [10, 7, 4, 1]);
+            eq!(from(0).to(10).step(-3), []);
+            eq!(from(-10).to(-20).step(-5), [-10, -15, -20]);
         }
     }
 }
