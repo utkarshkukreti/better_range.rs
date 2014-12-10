@@ -147,6 +147,26 @@ mod test {
         }
 
         describe! benches {
+            bench "native range 1 to 1 million" (b) {
+                b.iter(|| {
+                    let mut ret = 0;
+                    for i in ::std::iter::range(1i, 1_000_000) {
+                        ret ^= i;
+                    }
+                    ret
+                });
+            }
+
+            bench "better_range from 1 to 1 million" (b) {
+                b.iter(|| {
+                    let mut ret = 0;
+                    for i in from(1).until(1_000_000) {
+                        ret ^= i;
+                    }
+                    ret
+                });
+            }
+
             bench "native range_step 1 to 10 million step 10" (b) {
                 b.iter(|| {
                     let mut ret = 0;
