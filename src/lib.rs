@@ -27,6 +27,7 @@ impl Step for int {
 }
 
 impl<T: Step> Iterator<T> for Range<T> {
+    #[inline]
     fn next(&mut self) -> Option<T> {
         match (self.done, self.reverse, self.inclusive) {
             (true, _, _) => None,
