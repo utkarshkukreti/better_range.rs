@@ -8,7 +8,7 @@ pub struct Range<T> {
     done: bool
 }
 
-pub trait Step {
+pub trait Step: Copy + PartialOrd {
     fn zero() -> Self;
     fn one() -> Self;
     fn next(from: Self, step: Self) -> Option<Self>;
@@ -24,7 +24,7 @@ impl Step for int {
     fn infinity() -> int { Int::max_value() }
 }
 
-impl<T: Copy + PartialOrd + Step> Iterator<T> for Range<T> {
+impl<T: Step> Iterator<T> for Range<T> {
     fn next(&mut self) -> Option<T> {
         if self.done {
             None
