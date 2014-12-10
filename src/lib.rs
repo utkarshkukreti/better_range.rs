@@ -3,7 +3,8 @@ use std::num::Int;
 pub struct Range<T> {
     from: T,
     to: T,
-    step: T
+    step: T,
+    done: bool
 }
 
 pub trait Step {
