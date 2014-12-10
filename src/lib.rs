@@ -44,27 +44,32 @@ impl<T: Copy + PartialOrd + Step> Iterator<T> for Range<T> {
 pub fn from<T: Step>(from: T) -> Range<T> {
     Range {
         from: from,
-        to: Step::infinity(),
-        step: Step::one(),
-        done: false
+        ..Range::new()
     }
 }
 
 pub fn to<T: Step>(to: T) -> Range<T> {
     Range {
-        from: Step::zero(),
         to: to,
-        step: Step::one(),
-        done: false
+        ..Range::new()
     }
 }
 
 pub fn step<T: Step>(step: T) -> Range<T> {
     Range {
-        from: Step::zero(),
-        to: Step::infinity(),
         step: step,
-        done: false
+        ..Range::new()
+    }
+}
+
+impl<T: Step> Range<T> {
+    pub fn new() -> Range<T> {
+        Range {
+            from: Step::zero(),
+            to: Step::infinity(),
+            step: Step::one(),
+            done: false
+        }
     }
 }
 
