@@ -109,9 +109,11 @@ impl<T: Step> Range<T> {
 
 #[cfg(test)]
 mod test {
+    extern crate test;
     #[phase(plugin)]
     extern crate stainless;
 
+    pub use self::test::Bencher;
     pub use super::{from, step, to};
 
     macro_rules! eq {
@@ -142,6 +144,28 @@ mod test {
         it "handles exclusive ranges" {
             eq!(from(10).until(20).step(5), [10, 15])
             eq!(from(10).until(-10).step(-5), [10, 5, 0, -5]);
+        }
+
+        describe! benches {
+            bench "native range_step 1 to 10 million step 10" (b) {
+                b.iter(|| {
+                    let mut ret = 0;
+                    for i in ::std::iter::range_step(1i, 10_000_000, 10) {
+                        ret ^= i;
+                    }
+                    ret
+                });
+            }
+
+            bench "better_range from 1 to 10 million step 10" (b) {
+                b.iter(|| {
+                    let mut ret = 0;
+                    for i in from(1).until(10_000_000).step(10) {
+                        ret ^= i;
+                    }
+                    ret
+                });
+            }
         }
     }
 }
