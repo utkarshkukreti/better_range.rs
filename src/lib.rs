@@ -59,12 +59,21 @@ pub fn to<T: Step>(to: T) -> Range<T> {
     }
 }
 
+pub fn step<T: Step>(step: T) -> Range<T> {
+    Range {
+        from: Step::zero(),
+        to: Step::infinity(),
+        step: step,
+        done: false
+    }
+}
+
 #[cfg(test)]
 mod test {
     #[phase(plugin)]
     extern crate stainless;
 
-    pub use super::{from, to};
+    pub use super::{from, step, to};
 
     macro_rules! eq {
         ($range:expr, $slice:expr) => {
@@ -77,6 +86,7 @@ mod test {
             eq!(from(-1).take(4), [-1, 0, 1, 2])
             eq!(from(1).take(5), [1, 2, 3, 4, 5]);
             eq!(to(4), [0, 1, 2, 3, 4])
+            eq!(step(4).take(5), [0, 4, 8, 12, 16]);
         }
     }
 }
