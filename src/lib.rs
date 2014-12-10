@@ -1,3 +1,5 @@
-#[test]
-fn it_works() {
+pub struct Range<T> {
+    from: T,
+    to: T,
+    step: T
 }
