@@ -105,5 +105,10 @@ mod test {
             eq!(to(4), [0, 1, 2, 3, 4])
             eq!(step(4).take(5), [0, 4, 8, 12, 16]);
         }
+
+        it "handles chaining" {
+            eq!(from(0).to(10).step(2), [0, 2, 4, 6, 8, 10])
+            eq!(from(0).step(20).take(4), [0, 20, 40, 60])
+        }
     }
 }
