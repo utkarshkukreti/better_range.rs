@@ -17,14 +17,22 @@ pub trait Step: Copy + PartialOrd {
     fn infinity() -> Self;
 }
 
-impl Step for int {
-    fn zero() -> int { 0 }
-    fn one() -> int { 1 }
-    fn next(from: int, step: int) -> Option<int> {
-        from.checked_add(step)
+macro_rules! impl_step_int {
+    ($($ty:ty),+) => {
+        $(
+            impl Step for $ty {
+                fn zero() -> $ty { 0 }
+                fn one() -> $ty { 1 }
+                fn next(from: $ty, step: $ty) -> Option<$ty> {
+                    from.checked_add(step)
+                }
+                fn infinity() -> $ty { Int::max_value() }
+            }
+        )+
     }
-    fn infinity() -> int { Int::max_value() }
 }
+
+impl_step_int!(u8, u16, u32, u64, uint, i8, i16, i32, i64, int)
 
 impl<T: Step> Iterator<T> for Range<T> {
     #[inline]
@@ -125,26 +133,26 @@ mod test {
 
     describe! better_range {
         it "works for trivial cases" {
-            eq!(from(-1).take(4), [-1, 0, 1, 2])
-            eq!(from(1).take(5), [1, 2, 3, 4, 5]);
-            eq!(to(4), [0, 1, 2, 3, 4])
-            eq!(step(4).take(5), [0, 4, 8, 12, 16]);
+            eq!(from(-1i).take(4), [-1, 0, 1, 2])
+            eq!(from(1i).take(5), [1, 2, 3, 4, 5]);
+            eq!(to(4i), [0, 1, 2, 3, 4])
+            eq!(step(4i).take(5), [0, 4, 8, 12, 16]);
         }
 
         it "handles chaining" {
-            eq!(from(0).to(10).step(2), [0, 2, 4, 6, 8, 10])
-            eq!(from(0).step(20).take(4), [0, 20, 40, 60])
+            eq!(from(0i).to(10).step(2), [0, 2, 4, 6, 8, 10])
+            eq!(from(0i).step(20).take(4), [0, 20, 40, 60])
         }
 
         it "works with negative steps" {
-            eq!(from(10).to(0).step(-3), [10, 7, 4, 1]);
-            eq!(from(0).to(10).step(-3), []);
-            eq!(from(-10).to(-20).step(-5), [-10, -15, -20]);
+            eq!(from(10i).to(0).step(-3), [10, 7, 4, 1]);
+            eq!(from(0i).to(10).step(-3), []);
+            eq!(from(-10i).to(-20).step(-5), [-10, -15, -20]);
         }
 
         it "handles exclusive ranges" {
-            eq!(from(10).until(20).step(5), [10, 15])
-            eq!(from(10).until(-10).step(-5), [10, 5, 0, -5]);
+            eq!(from(10i).until(20).step(5), [10, 15])
+            eq!(from(10i).until(-10).step(-5), [10, 5, 0, -5]);
         }
 
         describe! benches {
@@ -161,7 +169,7 @@ mod test {
             bench "better_range from 1 to 1 million" (b) {
                 b.iter(|| {
                     let mut ret = 0;
-                    for i in from(1).until(1_000_000) {
+                    for i in from(1i).until(1_000_000) {
                         ret ^= i;
                     }
                     ret
@@ -181,7 +189,7 @@ mod test {
             bench "better_range from 1 to 10 million step 10" (b) {
                 b.iter(|| {
                     let mut ret = 0;
-                    for i in from(1).until(10_000_000).step(10) {
+                    for i in from(1i).until(10_000_000).step(10) {
                         ret ^= i;
                     }
                     ret
