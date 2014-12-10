@@ -6,7 +6,8 @@ pub struct Range<T> {
     to: T,
     step: T,
     done: bool,
-    reverse: bool
+    reverse: bool,
+    inclusive: bool
 }
 
 pub trait Step: Copy + PartialOrd {
@@ -27,18 +28,20 @@ impl Step for int {
 
 impl<T: Step> Iterator<T> for Range<T> {
     fn next(&mut self) -> Option<T> {
-        if self.done {
-            None
-        } else if self.reverse && self.to > self.from ||
-                 !self.reverse && self.to < self.from {
-            None
-        } else {
-            let ret = self.from;
-            match Step::next(self.from, self.step) {
-                Some(new) => self.from = new,
-                None => self.done = true
+        match (self.done, self.reverse, self.inclusive) {
+            (true, _, _) => None,
+            (_, true, true)   if self.to > self.from  => None,
+            (_, true, false)  if self.to >= self.from => None,
+            (_, false, true)  if self.from > self.to  => None,
+            (_, false, false) if self.from >= self.to => None,
+            _ => {
+                let ret = self.from;
+                match Step::next(self.from, self.step) {
+                    Some(new) => self.from = new,
+                    None => self.done = true
+                }
+                Some(ret)
             }
-            Some(ret)
         }
     }
 }
@@ -49,6 +52,10 @@ pub fn from<T: Step>(from: T) -> Range<T> {
 
 pub fn to<T: Step>(to: T) -> Range<T> {
     Range::new().to(to)
+}
+
+pub fn until<T: Step>(until: T) -> Range<T> {
+    Range::new().until(until)
 }
 
 pub fn step<T: Step>(step: T) -> Range<T> {
@@ -62,7 +69,8 @@ impl<T: Step> Range<T> {
             to: Step::infinity(),
             step: Step::one(),
             done: false,
-            reverse: false
+            reverse: false,
+            inclusive: true
         }
     }
 
@@ -76,6 +84,15 @@ impl<T: Step> Range<T> {
     pub fn to(self, to: T) -> Range<T> {
         Range {
             to: to,
+            inclusive: true,
+            ..self
+        }
+    }
+
+    pub fn until(self, until: T) -> Range<T> {
+        Range {
+            to: until,
+            inclusive: false,
             ..self
         }
     }
@@ -120,6 +137,11 @@ mod test {
             eq!(from(10).to(0).step(-3), [10, 7, 4, 1]);
             eq!(from(0).to(10).step(-3), []);
             eq!(from(-10).to(-20).step(-5), [-10, -15, -20]);
+        }
+
+        it "handles exclusive ranges" {
+            eq!(from(10).until(20).step(5), [10, 15])
+            eq!(from(10).until(-10).step(-5), [10, 5, 0, -5]);
         }
     }
 }
