@@ -28,6 +28,8 @@ impl<T: Copy + PartialOrd + Step> Iterator<T> for Range<T> {
     fn next(&mut self) -> Option<T> {
         if self.done {
             None
+        } else if self.from > self.to {
+            None
         } else {
             let ret = self.from;
             match Step::next(self.from, self.step) {
@@ -48,12 +50,21 @@ pub fn from<T: Step>(from: T) -> Range<T> {
     }
 }
 
+pub fn to<T: Step>(to: T) -> Range<T> {
+    Range {
+        from: Step::zero(),
+        to: to,
+        step: Step::one(),
+        done: false
+    }
+}
+
 #[cfg(test)]
 mod test {
     #[phase(plugin)]
     extern crate stainless;
 
-    pub use super::from;
+    pub use super::{from, to};
 
     macro_rules! eq {
         ($range:expr, $slice:expr) => {
@@ -65,6 +76,7 @@ mod test {
         it "works for trivial cases" {
             eq!(from(-1).take(4), [-1, 0, 1, 2])
             eq!(from(1).take(5), [1, 2, 3, 4, 5]);
+            eq!(to(4), [0, 1, 2, 3, 4])
         }
     }
 }
