@@ -1,8 +1,12 @@
 [package]
-
 name = "better_range"
 version = "0.0.1"
 authors = ["Utkarsh Kukreti <utkarshkukreti@gmail.com>"]
+license = "MIT"
+description = """
+An alternative to the std::iter::range* iterators supporting floats and chars,
+ and a fluent interface to construct ranges.
+"""
 
 [dependencies]
 stainless = "0.0.4"
