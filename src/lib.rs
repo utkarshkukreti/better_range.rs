@@ -169,7 +169,7 @@ pub fn step<T: Copy + First + Next + Step<T>>(step: T) -> RangeStep<T> {
     }
 }
 
-impl<T: First + Next> Range<T> {
+impl<T: Next> Range<T> {
     fn to(self, to: T) -> Range<T> {
         Range {
             to: Some(to),
