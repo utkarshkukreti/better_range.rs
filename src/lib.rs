@@ -53,6 +53,7 @@ macro_rules! impl_step_int {
                 fn step(now: $ty, step: $ty) -> Option<$ty> {
                     now.checked_add(step)
                 }
+                #[allow(unused_comparisons)]
                 fn is_negative(step: $ty) -> bool {
                     step < 0
                 }
