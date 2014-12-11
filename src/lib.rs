@@ -244,6 +244,14 @@ mod test {
             eq!(from(10.0f32).until(-10.0).step(-5.), [10.0, 5.0, 0.0, -5.0]);
         }
 
+        it "handles edge cases for about-to-{over,under}flow integers" {
+            eq!(from(252u8), [252, 253, 254, 255])
+            eq!(from(125i8), [125, 126, 127])
+            eq!(from(240u8).step(5), [240, 245, 250, 255])
+            eq!(from(115i8).step(5), [115, 120, 125])
+            eq!(from(-123i8).step(-1), [-123, -124, -125, -126, -127, -128])
+        }
+
         describe! benches {
             bench "native range 1 to 1 million" (b) {
                 b.iter(|| {
