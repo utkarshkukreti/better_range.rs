@@ -3,30 +3,55 @@ use std::num::{Float, Int};
 
 pub struct Range<T> {
     from: T,
-    to: T,
+    to: Option<T>,
+    done: bool,
+    inclusive: bool
+}
+
+pub struct RangeStep<T> {
+    from: T,
+    to: Option<T>,
     step: T,
     done: bool,
     reverse: bool,
     inclusive: bool
 }
 
-pub trait Step: Copy + PartialOrd {
-    fn zero() -> Self;
-    fn one() -> Self;
-    fn next(from: Self, step: Self) -> Option<Self>;
-    fn infinity() -> Self;
+pub trait First {
+    fn first() -> Self;
+}
+
+pub trait Next {
+    fn next(now: Self) -> Option<Self>;
+}
+
+pub trait Step<T> {
+    fn default() -> Self;
+    fn step(now: Self, step: T) -> Option<Self>;
+    fn is_negative(step: T) -> bool;
 }
 
 macro_rules! impl_step_int {
     ($($ty:ty),+) => {
         $(
-            impl Step for $ty {
-                fn zero() -> $ty { 0 }
-                fn one() -> $ty { 1 }
-                fn next(from: $ty, step: $ty) -> Option<$ty> {
-                    from.checked_add(step)
+            impl First for $ty {
+                fn first() -> $ty { 0 }
+            }
+
+            impl Next for $ty {
+                fn next(now: $ty) -> Option<$ty> {
+                    now.checked_add(1)
                 }
-                fn infinity() -> $ty { Int::max_value() }
+            }
+
+            impl Step<$ty> for $ty {
+                fn default() -> $ty { 1 }
+                fn step(now: $ty, step: $ty) -> Option<$ty> {
+                    now.checked_add(step)
+                }
+                fn is_negative(step: $ty) -> bool {
+                    step < 0
+                }
             }
         )+
     }
@@ -37,13 +62,24 @@ impl_step_int!(u8, u16, u32, u64, uint, i8, i16, i32, i64, int)
 macro_rules! impl_step_float {
     ($($ty:ty),+) => {
         $(
-            impl Step for $ty {
-                fn zero() -> $ty { 0.0 }
-                fn one() -> $ty { 1.0 }
-                fn next(from: $ty, step: $ty) -> Option<$ty> {
-                    Some(from + step)
+            impl First for $ty {
+                fn first() -> $ty { 0.0 }
+            }
+
+            impl Next for $ty {
+                fn next(now: $ty) -> Option<$ty> {
+                    Some(now + 1.0)
                 }
-                fn infinity() -> $ty { Float::max_value() }
+            }
+
+            impl Step<$ty> for $ty {
+                fn default() -> $ty { 1.0 }
+                fn step(now: $ty, step: $ty) -> Option<$ty> {
+                    Some(now + step)
+                }
+                fn is_negative(step: $ty) -> bool {
+                    step < 0.0
+                }
             }
         )+
     }
@@ -51,18 +87,16 @@ macro_rules! impl_step_float {
 
 impl_step_float!(f32, f64)
 
-impl<T: Step> Iterator<T> for Range<T> {
+impl<T: Copy + Next + PartialOrd> Iterator<T> for Range<T> {
     #[inline]
     fn next(&mut self) -> Option<T> {
-        match (self.done, self.reverse, self.inclusive) {
+        match (self.done, self.inclusive, self.to) {
             (true, _, _) => None,
-            (_, true, true)   if self.to > self.from  => None,
-            (_, true, false)  if self.to >= self.from => None,
-            (_, false, true)  if self.from > self.to  => None,
-            (_, false, false) if self.from >= self.to => None,
+            (_, false, Some(to)) if self.from >= to => None,
+            (_, true, Some(to)) if self.from > to => None,
             _ => {
                 let ret = self.from;
-                match Step::next(self.from, self.step) {
+                match Next::next(self.from) {
                     Some(new) => self.from = new,
                     None => self.done = true
                 }
@@ -72,63 +106,92 @@ impl<T: Step> Iterator<T> for Range<T> {
     }
 }
 
-pub fn from<T: Step>(from: T) -> Range<T> {
-    Range::new().from(from)
-}
-
-pub fn to<T: Step>(to: T) -> Range<T> {
-    Range::new().to(to)
-}
-
-pub fn until<T: Step>(until: T) -> Range<T> {
-    Range::new().until(until)
-}
-
-pub fn step<T: Step>(step: T) -> Range<T> {
-    Range::new().step(step)
-}
-
-impl<T: Step> Range<T> {
-    pub fn new() -> Range<T> {
-        Range {
-            from: Step::zero(),
-            to: Step::infinity(),
-            step: Step::one(),
-            done: false,
-            reverse: false,
-            inclusive: true
+impl<T: Copy + PartialOrd + Step<T>> Iterator<T> for RangeStep<T> {
+    #[inline]
+    fn next(&mut self) -> Option<T> {
+        match (self.done, self.inclusive, self.reverse, self.to) {
+            (true, _, _, _) => None,
+            (_, false, false, Some(to)) if self.from >= to => None,
+            (_, false, true, Some(to)) if self.from <= to => None,
+            (_, true, false, Some(to)) if self.from > to => None,
+            (_, true, true, Some(to)) if self.from < to => None,
+            _ => {
+                let ret = self.from;
+                match Step::step(self.from, self.step) {
+                    Some(new) => self.from = new,
+                    None => self.done = true
+                }
+                Some(ret)
+            }
         }
     }
+}
 
-    pub fn from(self, from: T) -> Range<T> {
-        Range {
-            from: from,
-            ..self
-        }
+pub fn from<T: Next>(from: T) -> Range<T> {
+    Range {
+        from: from,
+        to: None,
+        inclusive: true,
+        done: false
     }
+}
 
-    pub fn to(self, to: T) -> Range<T> {
+pub fn to<T: First + Next>(to: T) -> Range<T> {
+    Range {
+        from: First::first(),
+        to: Some(to),
+        inclusive: true,
+        done: false
+    }
+}
+
+pub fn until<T: First + Next>(until: T) -> Range<T> {
+    Range {
+        from: First::first(),
+        to: Some(until),
+        inclusive: true,
+        done: false
+    }
+}
+
+pub fn step<T: Copy + First + Next + Step<T>>(step: T) -> RangeStep<T> {
+    RangeStep {
+        from: First::first(),
+        to: None,
+        step: step,
+        inclusive: true,
+        reverse: Step::is_negative(step),
+        done: false
+    }
+}
+
+impl<T: First + Next> Range<T> {
+    fn to(self, to: T) -> Range<T> {
         Range {
-            to: to,
+            to: Some(to),
             inclusive: true,
             ..self
         }
     }
 
-    pub fn until(self, until: T) -> Range<T> {
+    fn until(self, to: T) -> Range<T> {
         Range {
-            to: until,
+            to: Some(to),
             inclusive: false,
             ..self
         }
     }
+}
 
-    pub fn step(self, step: T) -> Range<T> {
-        let reverse = step < Step::zero();
-        Range {
+impl<T: Copy + First + Next + Step<T>> Range<T> {
+    fn step(self, step: T) -> RangeStep<T> {
+        RangeStep {
+            from: self.from,
+            to: self.to,
             step: step,
-            reverse: reverse,
-            ..self
+            inclusive: self.inclusive,
+            reverse: Step::is_negative(step),
+            done: false
         }
     }
 }
