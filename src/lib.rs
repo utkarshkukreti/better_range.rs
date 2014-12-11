@@ -138,6 +138,15 @@ impl<T: Copy + PartialOrd + Step<T>> Iterator<T> for RangeStep<T> {
     }
 }
 
+pub fn range<T: First + Next>() -> Range<T> {
+    Range {
+        from: First::first(),
+        to: None,
+        inclusive: true,
+        done: false
+    }
+}
+
 pub fn from<T: Next>(from: T) -> Range<T> {
     Range {
         from: from,
@@ -214,7 +223,7 @@ mod test {
     extern crate stainless;
 
     pub use self::test::Bencher;
-    pub use super::{from, step, to};
+    pub use super::{from, step, to, range};
 
     macro_rules! eq {
         ($range:expr, $slice:expr) => {
@@ -230,6 +239,7 @@ mod test {
             eq!(step(4i).take(5), [0, 4, 8, 12, 16]);
             eq!(to(4.0f32), [0., 1., 2., 3., 4.])
             eq!(step(0.4f32).take(3), [0.0, 0.4, 0.8])
+            eq!(range::<u8>().take(5), [0, 1, 2, 3, 4])
         }
 
         it "handles chaining" {
@@ -243,12 +253,14 @@ mod test {
             eq!(from(0i).to(10).step(-3), []);
             eq!(from(-10i).to(-20).step(-5), [-10, -15, -20]);
             eq!(from(-10.0f32).to(-20.).step(-5.), [-10., -15., -20.]);
+            eq!(range::<i8>().step(-4).take(5), [0, -4, -8, -12, -16])
         }
 
         it "handles exclusive ranges" {
             eq!(from(10i).until(20).step(5), [10, 15])
             eq!(from(10i).until(-10).step(-5), [10, 5, 0, -5]);
             eq!(from(10.0f32).until(-10.0).step(-5.), [10.0, 5.0, 0.0, -5.0]);
+            eq!(range().until(5u), [0, 1, 2, 3, 4])
         }
 
         it "handles edge cases for about-to-{over,under}flow integers" {
@@ -257,6 +269,7 @@ mod test {
             eq!(from(240u8).step(5), [240, 245, 250, 255])
             eq!(from(115i8).step(5), [115, 120, 125])
             eq!(from(-123i8).step(-1), [-123, -124, -125, -126, -127, -128])
+            eq!(range::<u8>().step(100), [0, 100, 200])
         }
 
         it "handles char ranges" {
