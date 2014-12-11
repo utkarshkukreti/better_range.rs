@@ -176,7 +176,7 @@ pub fn step<T: Copy + First + Next + Step<T>>(step: T) -> RangeStep<T> {
 }
 
 impl<T: Next> Range<T> {
-    fn to(self, to: T) -> Range<T> {
+    pub fn to(self, to: T) -> Range<T> {
         Range {
             to: Some(to),
             inclusive: true,
@@ -184,7 +184,7 @@ impl<T: Next> Range<T> {
         }
     }
 
-    fn until(self, to: T) -> Range<T> {
+    pub fn until(self, to: T) -> Range<T> {
         Range {
             to: Some(to),
             inclusive: false,
@@ -194,7 +194,7 @@ impl<T: Next> Range<T> {
 }
 
 impl<T: Copy + First + Next + Step<T>> Range<T> {
-    fn step(self, step: T) -> RangeStep<T> {
+    pub fn step(self, step: T) -> RangeStep<T> {
         RangeStep {
             from: self.from,
             to: self.to,
