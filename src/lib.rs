@@ -102,14 +102,14 @@ impl<T: Copy + Next + PartialOrd> Iterator<T> for Range<T> {
     #[inline]
     fn next(&mut self) -> Option<T> {
         match (self.done, self.inclusive, self.to) {
-            (true, _, _) => None,
+            (true, _, _)                            => None,
             (_, false, Some(to)) if self.from >= to => None,
-            (_, true, Some(to)) if self.from > to => None,
+            (_, true,  Some(to)) if self.from >  to => None,
             _ => {
                 let ret = self.from;
                 match Next::next(self.from) {
                     Some(new) => self.from = new,
-                    None => self.done = true
+                    None      => self.done = true
                 }
                 Some(ret)
             }
@@ -121,11 +121,11 @@ impl<T: Copy + PartialOrd + Step<T>> Iterator<T> for RangeStep<T> {
     #[inline]
     fn next(&mut self) -> Option<T> {
         match (self.done, self.inclusive, self.reverse, self.to) {
-            (true, _, _, _) => None,
+            (true, _, _, _)                                => None,
             (_, false, false, Some(to)) if self.from >= to => None,
-            (_, false, true, Some(to)) if self.from <= to => None,
-            (_, true, false, Some(to)) if self.from > to => None,
-            (_, true, true, Some(to)) if self.from < to => None,
+            (_, false, true,  Some(to)) if self.from <= to => None,
+            (_, true,  false, Some(to)) if self.from >  to => None,
+            (_, true,  true,  Some(to)) if self.from <  to => None,
             _ => {
                 let ret = self.from;
                 match Step::step(self.from, self.step) {
