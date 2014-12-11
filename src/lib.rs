@@ -40,7 +40,11 @@ macro_rules! impl_step_int {
 
             impl Next for $ty {
                 fn next(now: $ty) -> Option<$ty> {
-                    now.checked_add(1)
+                    if now == Int::max_value() {
+                        None
+                    } else {
+                        Some(now + 1)
+                    }
                 }
             }
 
