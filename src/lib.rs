@@ -31,7 +31,7 @@ pub trait Step<T> {
     fn is_negative(step: T) -> bool;
 }
 
-macro_rules! impl_step_int {
+macro_rules! impl_ints {
     ($($ty:ty),+) => {
         $(
             impl First for $ty {
@@ -62,9 +62,9 @@ macro_rules! impl_step_int {
     }
 }
 
-impl_step_int!(u8, u16, u32, u64, uint, i8, i16, i32, i64, int)
+impl_ints!(u8, u16, u32, u64, uint, i8, i16, i32, i64, int)
 
-macro_rules! impl_step_float {
+macro_rules! impl_floats {
     ($($ty:ty),+) => {
         $(
             impl First for $ty {
@@ -90,7 +90,7 @@ macro_rules! impl_step_float {
     }
 }
 
-impl_step_float!(f32, f64)
+impl_floats!(f32, f64)
 
 impl Next for char {
     fn next(now: char) -> Option<char> {
