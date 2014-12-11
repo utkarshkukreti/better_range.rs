@@ -1,5 +1,5 @@
 #![feature(macro_rules, phase)]
-use std::num::{Float, Int};
+use std::num::Int;
 
 pub struct Range<T> {
     from: T,
