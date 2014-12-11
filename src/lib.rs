@@ -91,6 +91,12 @@ macro_rules! impl_step_float {
 
 impl_step_float!(f32, f64)
 
+impl Next for char {
+    fn next(now: char) -> Option<char> {
+        std::char::from_u32(now as u32 + 1)
+    }
+}
+
 impl<T: Copy + Next + PartialOrd> Iterator<T> for Range<T> {
     #[inline]
     fn next(&mut self) -> Option<T> {
@@ -250,6 +256,12 @@ mod test {
             eq!(from(240u8).step(5), [240, 245, 250, 255])
             eq!(from(115i8).step(5), [115, 120, 125])
             eq!(from(-123i8).step(-1), [-123, -124, -125, -126, -127, -128])
+        }
+
+        it "handles char ranges" {
+            eq!(from('a').to('c'), ['a', 'b', 'c'])
+            eq!(from('0').to('5'), ['0', '1', '2', '3', '4', '5'])
+            eq!(from(::std::char::MAX), [::std::char::MAX])
         }
 
         describe! benches {
