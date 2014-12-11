@@ -8,6 +8,18 @@ extern crate stainless;
 pub use better_range::{from, step, to, range};
 
 describe! benches {
+    bench "while loop 1 to 1 million" (b) {
+        b.iter(|| {
+            let mut ret = 0;
+            let mut i = 0i;
+            while i < 1_000_000 {
+                ret ^= i;
+                i += 1
+            }
+            ret
+        });
+    }
+
     bench "native range 1 to 1 million" (b) {
         b.iter(|| {
             let mut ret = 0;
@@ -23,6 +35,18 @@ describe! benches {
             let mut ret = 0;
             for i in from(1i).until(1_000_000) {
                 ret ^= i;
+            }
+            ret
+        });
+    }
+
+    bench "while loop 1 to 10 million step 10" (b) {
+        b.iter(|| {
+            let mut ret = 0;
+            let mut i = 0i;
+            while i < 10_000_000 {
+                ret ^= i;
+                i += 10
             }
             ret
         });
