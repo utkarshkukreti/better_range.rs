@@ -6,69 +6,58 @@ extern crate test;
 extern crate stainless;
 
 pub use better_range::{from, step, to, range};
+pub use test::black_box;
 
 describe! benches {
     bench "while loop 1 to 1 million" (b) {
         b.iter(|| {
-            let mut ret = 0;
             let mut i = 0i;
             while i < 1_000_000 {
-                ret ^= i;
+                black_box(i);
                 i += 1
             }
-            ret
         });
     }
 
     bench "native range 1 to 1 million" (b) {
         b.iter(|| {
-            let mut ret = 0;
             for i in ::std::iter::range(1i, 1_000_000) {
-                ret ^= i;
+                black_box(i)
             }
-            ret
         });
     }
 
     bench "better_range from 1 to 1 million" (b) {
         b.iter(|| {
-            let mut ret = 0;
             for i in from(1i).until(1_000_000) {
-                ret ^= i;
+                black_box(i)
             }
-            ret
         });
     }
 
     bench "while loop 1 to 10 million step 10" (b) {
         b.iter(|| {
-            let mut ret = 0;
             let mut i = 0i;
             while i < 10_000_000 {
-                ret ^= i;
+                black_box(i);
                 i += 10
             }
-            ret
         });
     }
 
     bench "native range_step 1 to 10 million step 10" (b) {
         b.iter(|| {
-            let mut ret = 0;
             for i in ::std::iter::range_step(1i, 10_000_000, 10) {
-                ret ^= i;
+                black_box(i)
             }
-            ret
         });
     }
 
     bench "better_range from 1 to 10 million step 10" (b) {
         b.iter(|| {
-            let mut ret = 0;
             for i in from(1i).until(10_000_000).step(10) {
-                ret ^= i;
+                black_box(i)
             }
-            ret
         });
     }
 }
