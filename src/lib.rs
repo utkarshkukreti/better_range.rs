@@ -140,15 +140,6 @@ impl<T: Copy + PartialOrd + Step<T>> Iterator<T> for RangeStep<T> {
     }
 }
 
-pub fn range<T: First + Next>() -> Range<T> {
-    Range {
-        from: First::first(),
-        to: None,
-        inclusive: true,
-        done: false
-    }
-}
-
 pub fn from<T: Next>(from: T) -> Range<T> {
     Range {
         from: from,
@@ -158,33 +149,20 @@ pub fn from<T: Next>(from: T) -> Range<T> {
     }
 }
 
+pub fn range<T: First + Next>() -> Range<T> {
+    from(First::first())
+}
+
 pub fn to<T: First + Next>(to: T) -> Range<T> {
-    Range {
-        from: First::first(),
-        to: Some(to),
-        inclusive: true,
-        done: false
-    }
+    range().to(to)
 }
 
 pub fn until<T: First + Next>(until: T) -> Range<T> {
-    Range {
-        from: First::first(),
-        to: Some(until),
-        inclusive: true,
-        done: false
-    }
+    range().until(until)
 }
 
 pub fn step<T: Copy + First + Next + Step<T>>(step: T) -> RangeStep<T> {
-    RangeStep {
-        from: First::first(),
-        to: None,
-        step: step,
-        inclusive: true,
-        reverse: Step::is_negative(step),
-        done: false
-    }
+    range().step(step)
 }
 
 impl<T: Next> Range<T> {
