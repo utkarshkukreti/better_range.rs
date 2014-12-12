@@ -26,7 +26,6 @@ pub trait Next {
 }
 
 pub trait Step<T> {
-    fn default() -> Self;
     fn step(now: Self, step: T) -> Option<Self>;
     fn is_negative(step: T) -> bool;
 }
@@ -50,7 +49,6 @@ macro_rules! impl_ints {
             }
 
             impl Step<$ty> for $ty {
-                fn default() -> $ty { 1 }
                 #[inline]
                 fn step(now: $ty, step: $ty) -> Option<$ty> {
                     now.checked_add(step)
@@ -81,7 +79,6 @@ macro_rules! impl_floats {
             }
 
             impl Step<$ty> for $ty {
-                fn default() -> $ty { 1.0 }
                 #[inline]
                 fn step(now: $ty, step: $ty) -> Option<$ty> {
                     Some(now + step)
