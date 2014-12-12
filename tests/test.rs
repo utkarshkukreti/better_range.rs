@@ -18,6 +18,7 @@ describe! better_range_ {
         eq!(from(-1i).take(4), [-1, 0, 1, 2])
         eq!(from(1i).take(5), [1, 2, 3, 4, 5]);
         eq!(to(4i), [0, 1, 2, 3, 4])
+        eq!(to(-5i), [])
         eq!(step(4i).take(5), [0, 4, 8, 12, 16]);
         eq!(to(4.0f32), [0., 1., 2., 3., 4.])
         eq!(step(0.4f32).take(3), [0.0, 0.4, 0.8])
@@ -41,6 +42,7 @@ describe! better_range_ {
     it "handles exclusive ranges" {
         eq!(from(10i).until(20).step(5), [10, 15])
         eq!(from(10i).until(-10).step(-5), [10, 5, 0, -5]);
+        eq!(from(20i).until(20), [])
         eq!(from(10.0f32).until(-10.0).step(-5.), [10.0, 5.0, 0.0, -5.0]);
         eq!(range().until(5u), [0, 1, 2, 3, 4])
     }
@@ -57,6 +59,7 @@ describe! better_range_ {
     it "handles char ranges" {
         eq!(from('a').to('c'), ['a', 'b', 'c'])
         eq!(from('0').to('5'), ['0', '1', '2', '3', '4', '5'])
+        eq!(from('z').to('a'), [])
         eq!(from(::std::char::MAX), [::std::char::MAX])
     }
 }
