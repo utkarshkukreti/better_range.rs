@@ -62,7 +62,7 @@ macro_rules! impl_ints {
     }
 }
 
-impl_ints!(u8, u16, u32, u64, uint, i8, i16, i32, i64, int)
+impl_ints!(u8, u16, u32, u64, uint, i8, i16, i32, i64, int);
 
 macro_rules! impl_floats {
     ($($ty:ty),+) => {
@@ -91,7 +91,7 @@ macro_rules! impl_floats {
     }
 }
 
-impl_floats!(f32, f64)
+impl_floats!(f32, f64);
 
 impl Next for char {
     #[inline]
