@@ -9,4 +9,4 @@ An alternative to the std::iter::range* iterators supporting floats and chars,
 """
 
 [dependencies]
-stainless = "0.0.4"
+stainless = "0.0.7"
